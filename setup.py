@@ -6,7 +6,7 @@ setup(
     url='https://code.kyoto.io/qpfiffer/olegdb-python',
     name='olegdb-python',
     description='Python wrappers for generic OlegDB methods.',
-    version='0.1',
+    version='0.1.1',
     license='BSD',
     keywords='OlegDB',
     packages=['olegdb'],

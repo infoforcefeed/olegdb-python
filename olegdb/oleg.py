@@ -1,4 +1,4 @@
-import requests, msgpack, hashlib, pickle
+import requests, msgpack, pickle, time
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 8080
@@ -50,8 +50,10 @@ class OlegDB(object):
             expiration = int(time.mktime(time.gmtime())) + timeout
             requests.post(connect_str, data=new_value,
                     headers={"X-OlegDB-use-by": expiration})
+            return True
 
         requests.post(connect_str, data=new_value)
+        return True
 
     def delete(self, key):
         connect_str = self._build_host_str(key)
