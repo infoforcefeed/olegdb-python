@@ -1,0 +1,6 @@
+build/*
+dist/*
+olegdb_python.egg-info/
+*.swp
+*.swo
+
