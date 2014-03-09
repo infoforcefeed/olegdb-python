@@ -9,9 +9,10 @@ setup(
     version='0.1',
     license='BSD',
     keywords='OlegDB',
-    packages=['olegdb-python'],
+    packages=['olegdb'],
     zip_safe=False,
     install_requires = [
-        "requests"
+        "requests",
+        "msgpack-python>=0.4.1"
     ]
 )
