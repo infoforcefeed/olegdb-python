@@ -1,4 +1,4 @@
-import requests, msgpack, pickle, time
+import requests, msgpack, pickle, time, calendar
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 8080
@@ -45,19 +45,32 @@ class OlegDB(object):
     def set(self, key, value, timeout=None):
         new_value = self._pack_item(value)
         connect_str = self._build_host_str(key)
+        headers = {}
 
         if timeout is not None:
-            expiration = int(time.mktime(time.gmtime())) + timeout
-            requests.post(connect_str, data=new_value,
-                    headers={"X-OlegDB-use-by": expiration})
-            return True
+            gmtime = time.gmtime()
+            seconds = int(calendar.timegm(gmtime))
+            expiration =  seconds + timeout
+            headers["X-OlegDB-use-by"] = expiration
 
-        requests.post(connect_str, data=new_value)
+        requests.post(connect_str, data=new_value, headers=headers)
         return True
 
     def delete(self, key):
         connect_str = self._build_host_str(key)
         resp = requests.delete(connect_str)
+
+    def get_expiration(self, key):
+        connect_str = self._build_host_str(key)
+        resp = requests.head(connect_str)
+
+        if resp.status_code == 404:
+            return -2
+
+        if not resp.headers.get('expires', None):
+            return -1
+
+        return int(resp.headers['expires'])
 
     def get_many(self, keys):
         many = {}
