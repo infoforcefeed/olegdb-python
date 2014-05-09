@@ -18,7 +18,7 @@ class OlegDB(object):
         try:
             new_value = msgpack.packb(value, use_bin_type=True)
         except TypeError as e:
-            print e
+            print(e)
             new_value = pickle.dumps(value)
         return new_value
 
