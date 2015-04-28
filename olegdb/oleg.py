@@ -2,15 +2,17 @@ import requests, msgpack, pickle, time, calendar
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 8080
+DEFAULT_DB   = "oleg"
 
 class OlegDB(object):
-    def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT):
+    def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT, db_name=DEFAULT_DB):
         self.host = host
         self.port = port
+        self.db_name = db_name
 
     def _build_host_str(self, key):
-        connect_str = "http://{host}:{port}/{key}".format(
-                host=self.host, port=self.port, key=key)
+        connect_str = "http://{host}:{port}/{db_name}/{key}".format(
+                host=self.host, port=self.port, db_name=self.db_name, key=key)
         return connect_str
 
     def _pack_item(self, value):
