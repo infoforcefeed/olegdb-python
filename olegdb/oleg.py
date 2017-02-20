@@ -1,7 +1,7 @@
 import requests, msgpack, pickle, time, calendar
 
 DEFAULT_HOST = "localhost"
-DEFAULT_PORT = 8080
+DEFAULT_PORT = 38080
 DEFAULT_DB   = "oleg"
 
 class OlegDB(object):
@@ -13,6 +13,11 @@ class OlegDB(object):
     def _build_host_str(self, key):
         connect_str = "http://{host}:{port}/{db_name}/{key}".format(
                 host=self.host, port=self.port, db_name=self.db_name, key=key)
+        return connect_str
+
+    def _build_prefix_str(self, prefix):
+        connect_str = "http://{host}:{port}/{db_name}/{prefix}/_match".format(
+                host=self.host, port=self.port, db_name=self.db_name, prefix=prefix)
         return connect_str
 
     def _pack_item(self, value):
@@ -97,3 +102,14 @@ class OlegDB(object):
         for key in keys:
             self.delete(key, value, timeout)
 
+    def get_by_prefix(self, prefix):
+        to_return = []
+        connect_str = self._build_prefix_str(prefix)
+        resp = requests.get(connect_str, stream=True)
+        if resp.status_code == 404:
+            return to_return
+
+        for line in resp.text.split("\n"):
+            to_return.append(line)
+
+        return to_return
