@@ -1,3 +1,4 @@
+from StringIO import StringIO
 import requests, msgpack, pickle, time, calendar
 
 DEFAULT_HOST = "localhost"
@@ -80,11 +81,30 @@ class OlegDB(object):
         return int(resp.headers['expires'])
 
     def get_many(self, keys):
+        unjar_str = '\n'.join([str(x) for x in keys])
+        connect_str = self._build_host_str('_bulk_unjar')
+        resp = requests.post(connect_str, data=unjar_str, stream=True)
+        if resp.status_code == 404:
+            return {}
+
+        key_iter = 0
+        reader = StringIO(resp.text.encode('utf-8'))
         many = {}
-        for key in keys:
-            returned = self.get(key, version)
-            if returned:
-                many[key] = returned
+        while True:
+            size = reader.read(8)
+            if size == '':
+                break
+            size = int(size)
+
+            value = reader.read(size)
+            if value == '':
+                break
+
+            key = keys[key_iter]
+            many[key] = value
+            key_iter = key_iter + 1
+        reader.close()
+
         return many
 
     def has_key(self, key):
