@@ -3,10 +3,10 @@ from setuptools import setup
 setup(
     author='Quinlan Pfiffer',
     author_email='qpfiffer@gmail.com',
-    url='https://code.kyoto.io/qpfiffer/olegdb-python',
+    url='https://github.com/infoforcefeed/olegdb-python',
     name='olegdb-python',
     description='Python wrappers for generic OlegDB methods.',
-    version='0.1.4',
+    version='0.1.5',
     license='BSD',
     keywords='OlegDB',
     packages=['olegdb'],
