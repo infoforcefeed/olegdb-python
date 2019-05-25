@@ -13,6 +13,5 @@ setup(
     zip_safe=False,
     install_requires = [
         "requests",
-        "msgpack-python>=0.4.1"
     ]
 )

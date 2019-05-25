@@ -1,5 +1,5 @@
-from StringIO import StringIO
-import requests, msgpack, pickle, time, calendar
+#from StringIO import StringIO
+import requests, pickle, time, calendar
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 38080
@@ -22,13 +22,15 @@ class OlegDB(object):
         return connect_str
 
     def _pack_item(self, value):
-        new_value = None
-        try:
-            new_value = msgpack.packb(value, use_bin_type=True)
-        except TypeError as e:
-            print(e)
-            new_value = pickle.dumps(value)
+        new_value = pickle.dumps(value)
         return new_value
+        #new_value = None
+        #try:
+        #    new_value = msgpack.packb(value, use_bin_type=True)
+        #except TypeError as e:
+        #    print(e)
+        #    new_value = pickle.dumps(value)
+        #return new_value
 
     def add(self, key, value, timeout=None):
         resp = requests.get(self._build_host_str(key))
@@ -44,11 +46,12 @@ class OlegDB(object):
             return default
 
         raw_response = resp.raw.read()
-        try:
-            return msgpack.unpackb(raw_response, encoding='utf-8')
-        except msgpack.ExtraData:
-            # Fall back to pickle
-            return pickle.loads(raw_response)
+        return pickle.loads(raw_response)
+        #try:
+        #    return msgpack.unpackb(raw_response, encoding='utf-8')
+        #except msgpack.ExtraData:
+        #    # Fall back to pickle
+        #    return pickle.loads(raw_response)
 
     def set(self, key, value, timeout=None):
         new_value = self._pack_item(value)
@@ -66,7 +69,7 @@ class OlegDB(object):
 
     def delete(self, key):
         connect_str = self._build_host_str(key)
-        resp = requests.delete(connect_str)
+        requests.delete(connect_str)
 
     def get_expiration(self, key):
         connect_str = self._build_host_str(key)
@@ -88,22 +91,27 @@ class OlegDB(object):
             return {}
 
         key_iter = 0
-        reader = StringIO(resp.text.encode('utf-8'))
+        encoded = resp.text.encode('utf-8')
+        #reader = StringIO(resp.text.encode('utf-8'))
         many = {}
+        cursor = 0
         while True:
-            size = reader.read(8)
-            if size == '':
+            size = encoded[cursor:cursor + 8]
+            if len(size) == 0:
                 break
             size = int(size)
 
-            value = reader.read(size)
-            if value == '':
+            cursor += 8
+            value = encoded[cursor:cursor + size]
+            if len(value) == 0:
                 break
+
+            cursor += size
 
             key = keys[key_iter]
             many[key] = value
             key_iter = key_iter + 1
-        reader.close()
+        #reader.close()
 
         return many
 
@@ -120,7 +128,7 @@ class OlegDB(object):
 
     def delete_many(self, keys):
         for key in keys:
-            self.delete(key, value, timeout)
+            self.delete(key)
 
     def get_by_prefix(self, prefix):
         to_return = []
